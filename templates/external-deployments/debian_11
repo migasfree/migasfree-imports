@@ -1,0 +1,29 @@
+[
+  {
+    "name": "BASE",
+    "base_url": "http://ftp.debian.org/debian/",
+    "suite": "bullseye",
+    "components": "main",
+    "options": "[ Signed-By=/usr/share/keyrings/debian-archive-keyring.gpg ]",
+    "frozen": true,
+    "included_attributes": [1]
+  },
+  {
+    "name": "UPDATE",
+    "base_url": "http://ftp.debian.org/debian/",
+    "suite": "bullseye-updates",
+    "components": "main",
+    "options": "[ Signed-By=/usr/share/keyrings/debian-archive-keyring.gpg ]",
+    "frozen": false,
+    "included_attributes": [1]
+  },
+  {
+    "name": "SECURITY",
+    "base_url": "http://deb.debian.org/debian-security/",
+    "suite": "bullseye-security",
+    "components": "main",
+    "options": "[ Signed-By=/usr/share/keyrings/debian-archive-keyring.gpg ]",
+    "frozen": false,
+    "included_attributes": [1]
+  }
+]
