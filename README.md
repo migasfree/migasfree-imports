@@ -16,7 +16,7 @@ cd migasfree-imports
 
 ### External deployments
 
-This process configures the BASE, UPDATE and SECURITY repositories from the distro base to a Migasfree project, creating a cache of the repositories on your Migasfree server.
+This process configures the standard repositories (BASE, UPDATE, BACKPORTS, and SECURITY) from the distribution's base system to integrate with a Migasfree project, establishing a repository cache on your Migasfree server.
 
 The templates are located in  [templates/external-deployments](templates/external-deployments). If your distro base is not listed, please contribute by submitting a pull request to add it.
 
