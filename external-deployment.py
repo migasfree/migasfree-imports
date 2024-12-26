@@ -137,7 +137,7 @@ def main():
 
     for deployment in deployments:
         payload = {
-            "enabled": True,
+            "enabled": deployment["enabled"],
             "name": deployment["name"],
             "base_url": deployment["base_url"],
             "comment": f"Imported from {git_repo}\nTemplate: {distro_base}",
@@ -151,8 +151,6 @@ def main():
             "project": project_id,
             "included_attributes": deployment["included_attributes"]
         }
-
-
         create_deployment(server, token, payload)
 
 if __name__ == "__main__":
