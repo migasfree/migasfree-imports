@@ -7,7 +7,8 @@
     "components": "main universe restricted multiverse",
     "options": "[ Signed-By=/usr/share/keyrings/ubuntu-archive-keyring.gpg ]",
     "frozen": true,
-    "included_attributes": [1]
+    "included_attributes": [1],
+    "source": "E"
   },
   {
     "name": "UPDATE",
@@ -17,17 +18,19 @@
     "components": "main universe restricted multiverse",
     "options": "[ Signed-By=/usr/share/keyrings/ubuntu-archive-keyring.gpg ]",
     "frozen": false,
-    "included_attributes": [1]
+    "included_attributes": [1],
+    "source": "E"
   },
   {
     "name": "BACKPORTS",
-    "enabled": false,
+    "enabled": true,
     "base_url": "http://archive.ubuntu.com/ubuntu/",
     "suite": "jammy-backports",
     "components": "main universe restricted multiverse",
     "options": "[ Signed-By=/usr/share/keyrings/ubuntu-archive-keyring.gpg ]",
     "frozen": false,
-    "included_attributes": []
+    "included_attributes": [],
+    "source": "E"
   },
   {
     "name": "SECURITY",
@@ -37,6 +40,19 @@
     "components": "main universe restricted multiverse",
     "options": "[ Signed-By=/usr/share/keyrings/ubuntu-archive-keyring.gpg ]",
     "frozen": false,
-    "included_attributes": [1]
+    "included_attributes": [1],
+    "source": "E"
+  },
+  {
+    "name": "migasfree",
+    "enabled": true,
+    "comment": "INSTALL MIGASFREE-CLIENT\n\napt update\napt -y install wget gpg python3-distro\nwget -qO - https://{server}/get_key_repositories | gpg --output /usr/share/keyrings/{server}.gpg --dearmor --yes -\necho 'deb [signed-by=/usr/share/keyrings/{server}.gpg] http://{server}/public/{project_name}/repos {deployment_name} PKGS'>/etc/apt/sources.list.d/migasfree.list\napt update\napt install -y migasfree-client\nexport MIGASFREE_CLIENT_SERVER={server}\nmigasfree -u",
+    "available_packages": [],
+    "packages_to_install": ["migasfree-client"],
+    "packages_to_remove": [],
+    "included_attributes": [1],
+    "url_download": "https://migasfree.org/pub/ubuntu.22/",
+    "store": "thirds",
+    "source": "I"
   }
 ]
