@@ -46,12 +46,12 @@
   {
     "name": "migasfree",
     "enabled": true,
-    "comment": "INSTALL MIGASFREE-CLIENT\n\napt update\napt -y install wget gpg python3-distro\nwget -qO - https://{server}/get_key_repositories | gpg --output /usr/share/keyrings/{server}.gpg --dearmor --yes -\necho 'deb [signed-by=/usr/share/keyrings/{server}.gpg] http://{server}/public/{project_name}/repos {deployment_name} PKGS'>/etc/apt/sources.list.d/migasfree.list\napt update\napt install -y migasfree-client\nexport MIGASFREE_CLIENT_SERVER={server}\nmigasfree -u",
+    "comment": "INSTALL MIGASFREE-CLIENT\n\napt update\napt -y install wget gpg python3-distro\nwget -qO - https://{server}/get_key_repositories | gpg --output /usr/share/keyrings/{server}.gpg --dearmor --yes -\necho 'deb [signed-by=/usr/share/keyrings/{server}.gpg] http://{server}/public/{project_name}/repos {deployment_name} PKGS'>/etc/apt/sources.list.d/migasfree.list\napt update\napt install -y migasfree-client\nexport MIGASFREE_CLIENT_SERVER={server}\nexport MIGASFREE_CLIENT_PROJECT={project_name}\nmigasfree -u",
     "available_packages": [],
     "packages_to_install": ["migasfree-client"],
     "packages_to_remove": [],
     "included_attributes": [1],
-    "url_download": "https://migasfree.org/pub/debian.11/",
+    "url_download": "https://migasfree.org/pub/debian.12/",
     "store": "thirds",
     "source": "I"
   },
