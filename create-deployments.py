@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime
 
 from libs.migasfreeimport import MigasfreeImport
-from libs.utils import select_distro, select_project, download_packages
+from libs.utils import select_distro, select_project, download_packages, slugify
 
 GIT_REPO = "https://github.com/migasfree/migasfree-imports" # OFICIAL (default selected)
 PACKAGES_PATH = "./packages"
@@ -59,7 +59,9 @@ def main():
                 variables = {
                     'server': server,
                     'project_name': project_name,
-                    'deployment_name': deployment["name"]
+                    'project_slug': slugify(project_name),
+                    'deployment_name': deployment["name"],
+                    'deployment_slug': slugify(deployment["name"]),
                 }
                 comment = deployment['comment'].format(**variables)
             else:

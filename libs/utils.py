@@ -1,6 +1,8 @@
 import os
 import requests
 import getpass
+import unicodedata
+import re
 
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -110,3 +112,27 @@ def download_packages(url, destination_directory, repository_url="", visited=Non
 
     except requests.RequestException as e:
         print(f"Error accessing the URL or downloading files: {e}")
+
+
+# Copied from django.utils.text.slugify
+# Source: https://github.com/django/django/blob/main/django/utils/text.py
+# Modifications: None
+
+def slugify(value, allow_unicode=False):
+    """
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize("NFKC", value)
+    else:
+        value = (
+            unicodedata.normalize("NFKD", value)
+            .encode("ascii", "ignore")
+            .decode("ascii")
+        )
+    value = re.sub(r"[^\w\s-]", "", value.lower())
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
