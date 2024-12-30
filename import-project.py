@@ -55,9 +55,19 @@ def main():
             }
     project = client.get_or_post("/api/v1/token/projects/", filters=filters, payload=payload)[0]
 
+
+    # STORES
+    # ======
+    payload = {"name": "org", "project": project["id"]}
+    client.post("/api/v1/token/stores/", payload=payload)
+    payload = {"name": "thirds", "project": project["id"]}
+    client.post("/api/v1/token/stores/", payload=payload)
+    payload = {"name": "updates", "project": project["id"]}
+    client.post("/api/v1/token/stores/", payload=payload)
+
+
     # DEPLOYMENTS
     # ===========
-    """
     with open(os.path.join(TEMPLATES_PATH, "deployments", distro_base["name"]), "r") as file:
         deployments = json.load(file)
 
@@ -132,7 +142,7 @@ def main():
                     "available_packages": available_packages
                 }
                 client.post("/api/v1/token/deployments/", payload)
-    """
+
 
     # APPLICATIONS
     # ============
