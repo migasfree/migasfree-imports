@@ -20,32 +20,45 @@ def main():
 
     current_date = datetime.now().strftime("%Y-%m-%d")
 
-    # SERVER
-    server = os.getenv("MIGASFREE_CLIENT_SERVER") or input_string("Server")
-    client = MigasfreeImport(server)
+    client = MigasfreeImport()
 
     # DISTRO_BASE
+    # ===========
     with open(os.path.join(TEMPLATES_PATH, "distro_base"), "r") as file:
         distro_base = select_distro(json.load(file))
 
-    # PROJECT
-    projects = client.get_projects()
+    # SELECT PROJECT
+    # ==============
+    projects = client.get("/api/v1/token/projects/")
     project_name = select_project(projects)
-
-
-    with open(os.path.join(TEMPLATES_PATH, "deployments", distro_base["name"]), "r") as file:
-        deployments = json.load(file)
 
     print(f"Importing external deployments")
     print(f"==============================")
-    print(f"  Server: {server}")
+    print(f"  Server: {client.server}")
     print(f"  Project: {project_name}")
     print(f"  Distro Base: {distro_base['name']}")
     print()
 
+    # PLATFORM
+    payload={"name": distro_base["platform"]}
+    platform = client.get_or_post("/api/v1/token/platforms/", filters=payload, payload=payload)[0]
 
-    project_id = client.get_or_create_project(project_name, distro_base)
+    # PROJECT
+    # =======
+    filters = {"name": project_name}
+    payload ={
+                "name": project_name,
+                "pms": distro_base["pms"],
+                "architecture": distro_base["architecture"],
+                "auto_register_computers": True,
+                "platform": platform["id"]
+            }
+    project = client.get_or_post("/api/v1/token/projects/", filters=filters, payload=payload)[0]
 
+    # DEPLOYMENTS
+    # ===========
+    with open(os.path.join(TEMPLATES_PATH, "deployments", distro_base["name"]), "r") as file:
+        deployments = json.load(file)
 
     for deployment in deployments:
         if "ignored" in deployment:
@@ -57,9 +70,9 @@ def main():
 
             if "comment" in deployment:
                 variables = {
-                    'server': server,
-                    'project_name': project_name,
-                    'project_slug': slugify(project_name),
+                    'server': client.server,
+                    'project_name': project["name"],
+                    'project_slug': slugify(project["name"]),
                     'deployment_name': deployment["name"],
                     'deployment_slug': slugify(deployment["name"]),
                 }
@@ -80,40 +93,72 @@ def main():
                     "components": deployment["components"],
                     "frozen": deployment["frozen"],
                     "expire": 1440,
-                    "project": project_id,
+                    "project": project["id"],
                     "included_attributes": deployment["included_attributes"]
                 }
-                client.create_deployment(payload)
+                client.post("/api/v1/token/deployments/", payload)
 
             elif deployment["source"] == "I":
-
                 download_packages(deployment["url_download"], PACKAGES_PATH)
 
-                store_id = client.get_or_create_store(project_id, deployment["store"])
+                filters = {"name": deployment["store"], "project__id": project["id"]}
+                payload = {"name": deployment["store"], "project": project["id"]}
+                store = client.get_or_post("/api/v1/token/stores/", filters=filters, payload=payload)[0]
+
 
                 # Upload packages
+                # ===============
                 available_packages = []
                 for package in os.listdir(PACKAGES_PATH):
                     if os.path.isfile(os.path.join(PACKAGES_PATH, package)):
-                        response = client.upload_package(os.path.join(PACKAGES_PATH, package), project_id, store_id )
+                        response = client.upload_package(os.path.join(PACKAGES_PATH, package), project["id"], store["id"])
                         if response:
                             available_packages.append(response["id"])
 
                 shutil.rmtree(PACKAGES_PATH)
 
+
                 payload = {
                     "enabled": deployment["enabled"],
                     "name": deployment["name"],
-                    "comment": comment,
+                    "comment": "comment",
                     "start_date": current_date,
                     "source": "I",
-                    "project": project_id,
+                    "project": project["id"],
                     "included_attributes": deployment["included_attributes"],
                     "packages_to_install": deployment["packages_to_install"],
                     "packages_to_remove": deployment["packages_to_remove"],
                     "available_packages": available_packages
                 }
-                client.create_deployment(payload)
+                client.post("/api/v1/token/deployments/", payload)
+
+
+    # APPLICATIONS
+    # ============
+    with open(os.path.join(TEMPLATES_PATH, "applications", "applications"), "r") as file:
+        applications = json.load(file)
+    for application in applications:
+        # Category
+        payload = {"name": application["category"]}
+        category = client.get_or_post("/api/v1/token/catalog/categories/", filters=payload, payload=payload)[0]
+        # Apps
+        payload = {
+            "name": application["name"],
+            "level": application["level"],
+            "category": category['id'],
+            "score": application["score"],
+            "description": application["description"],
+            }
+        files = {"icon": (application["icon"], open(f"templates/applications/{application['icon']}","rb"), 'image/png')}
+        app = client.get_or_post("/api/v1/token/catalog/apps/", filters={"name": application["name"]}, payload=payload,files=files)[0]
+        # Project-Packages
+        payload={
+            "application": app["id"],
+            "packages_to_install": application["packages_to_install"],
+            "project": project["id"]
+        }
+        project_packages = client.get_or_post("/api/v1/token/catalog/project-packages/", filters={"application__id": app["id"],"project__id": project["id"]}, payload=payload)
+
 
 if __name__ == "__main__":
     main()
