@@ -57,6 +57,7 @@ def main():
 
     # DEPLOYMENTS
     # ===========
+    """
     with open(os.path.join(TEMPLATES_PATH, "deployments", distro_base["name"]), "r") as file:
         deployments = json.load(file)
 
@@ -131,7 +132,7 @@ def main():
                     "available_packages": available_packages
                 }
                 client.post("/api/v1/token/deployments/", payload)
-
+    """
 
     # APPLICATIONS
     # ============
@@ -148,6 +149,7 @@ def main():
             "category": category['id'],
             "score": application["score"],
             "description": application["description"],
+            "available_for_attributes": application["available_for_attributes"]
             }
         files = {"icon": (application["icon"], open(f"templates/applications/{application['icon']}","rb"), 'image/png')}
         app = client.get_or_post("/api/v1/token/catalog/apps/", filters={"name": application["name"]}, payload=payload,files=files)[0]
