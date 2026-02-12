@@ -1,2 +1,6 @@
 libs/__pycache__/*
 __pycache__/*
+.venv/*
+.agent/*
+.coverage
+*.pyc

@@ -1,56 +1,50 @@
 # migasfree-imports
 
-This project is used to import external deployments and devices into your Migasfree platform.
+Tool to import external deployments, projects, and applications into a Migasfree server.
 
+## 📚 Documentation
 
-## Getting Started
+Full documentation is available in the `docs/` directory, following the **Diátaxis** framework:
 
-### Cloning the Repository
+- **[Tutorials](docs/tutorials/getting_started.md)**: hands-on introduction for new users.
+- **[How-to Guides](docs/how-to/import_project.md)**: step-by-step guides for specific tasks.
+- **[Reference](docs/reference/api.md)**: technical reference for APIs and [CLI](docs/reference/cli.md).
+- **[Explanation](docs/explanation/architecture.md)**: clarification and discussion of background concepts.
 
-To use this project, clone it into a working directory:
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 git clone https://github.com/migasfree/migasfree-imports.git
 cd migasfree-imports
+pip install -e .
 ```
 
-### Imports
+### Usage
 
-The templates are located [here](templates). If your distro base is not listed, please contribute by submitting a pull request to add it.
-
-
-#### External deployments
-
-This process configures the standard repositories (BASE, UPDATE, BACKPORTS, and SECURITY) from the distribution's base system to integrate with a Migasfree project, establishing a repository cache on your Migasfree server.
-
-#### Internal deployment
-
-A repository called 'migasfree' is also created with the MigasFree packages to install on the clients.These packages are downloaded from [migasfree.org](migasfree.org).
-
-#### Applications
-
-Some applications will also be imported to be made available on Migasfree-Play.
-
-
-#### Running the Script
-
-Standard Execution
-
-To run the script, simply execute:
+Interactive mode:
 
 ```bash
-./import-project.py
+migasfree-import
 ```
 
-#### Non-Interactive Mode
-
-To run the script without being prompted for input (non-interactive mode), first export the required variables:
+Non-interactive mode (using environment variables):
 
 ```bash
-export MIGASFREE_CLIENT_SERVER=migasfree.acme.com
+export MIGASFREE_CLIENT_SERVER=migasfree.example.com
 export MIGASFREE_PACKAGER_USER=admin
-export MIGASFREE_PACKAGER_PASSWORD=password
-export MIGASFREE_PACKAGER_PROJECT=projectname
-export DISTRO_BASE=debian_12
-./import-project.py
+export MIGASFREE_PACKAGER_PASSWORD=secret
+export MIGASFREE_PACKAGER_PROJECT=myproject
+migasfree-import
+```
+
+See [CLI Reference](docs/reference/cli.md) for all available options.
+
+## 🧪 Testing
+
+Run unit tests with `pytest`:
+
+```bash
+PYTHONPATH=. pytest
 ```
