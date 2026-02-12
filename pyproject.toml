@@ -41,7 +41,7 @@ Homepage = "https://migasfree.org/"
 Repository = "https://github.com/migasfree/migasfree-imports/"
 
 [tool.setuptools]
-packages = {find = {where = ["."], include = ["libs*"]}}
+packages = {find = {where = ["."], include = ["migasfree_imports*"]}}
 
 [tool.ruff]
 line-length = 120
