@@ -25,7 +25,7 @@ graph TD
     end
     
     Main -->|Read| Templates
-    Main -->| "Download (if Source=I)" | ExternalRepo[External Repo]
+    Main -- "Download (if Source=I)" --> ExternalRepo[External Repo]
     ExternalRepo -->|Save| Packages
     
     Main -->|Authenticate| API
