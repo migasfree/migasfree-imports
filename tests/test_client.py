@@ -71,13 +71,12 @@ def test_get_token_success(mock_migasfree_env):
 
 
 def test_get_token_failure_missing_env(mock_migasfree_env):
-    with patch.dict(os.environ, {}, clear=True), patch.dict(
-        os.environ, {'MIGASFREE_CLIENT_SERVER': 'migasfree.test'}
-    ), patch.object(MigasfreeImport, 'get_token', return_value='fake'):
-        # We need to set MIGASFREE_CLIENT_SERVER because it's used in __init__
-        # And init calls get_token if token is not passed, so we must separate instantiation
-        client = MigasfreeImport()
+    with patch.dict(os.environ, {}, clear=True), patch.dict(os.environ, {'MIGASFREE_CLIENT_SERVER': 'migasfree.test'}):
+        # 1. Instantiate with a mock to bypass __init__ check
+        with patch.object(MigasfreeImport, 'get_token', return_value='fake'):
+            client = MigasfreeImport()
 
+        # 2. Call real get_token() which should fail because env vars are missing
         with pytest.raises(ValueError, match='must be set'):
             client.get_token()
 
