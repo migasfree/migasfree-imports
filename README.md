@@ -4,12 +4,14 @@ Tool to import external deployments, projects, and applications into a Migasfree
 
 ## 📚 Documentation
 
-Full documentation is available in the `docs/` directory, following the **Diátaxis** framework:
+The full documentation is available at [**docs/index.md**](docs/index.md).
 
-- **[Tutorials](docs/tutorials/getting_started.md)**: hands-on introduction for new users.
-- **[How-to Guides](docs/how-to/import_project.md)**: step-by-step guides for specific tasks.
-- **[Reference](docs/reference/api.md)**: technical reference for APIs and [CLI](docs/reference/cli.md).
-- **[Explanation](docs/explanation/architecture.md)**: clarification and discussion of background concepts.
+It follows the **Diátaxis** framework:
+
+- **[Tutorials](docs/tutorials/getting_started.md)**
+- **[How-to Guides](docs/how-to/import_project.md)**
+- **[Reference](docs/reference/api.md)**
+- **[Explanation](docs/explanation/architecture.md)**
 
 ## 🚀 Quick Start
 

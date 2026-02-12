@@ -17,8 +17,6 @@ If you manage a Migasfree server, `migasfree-imports` allows you to:
 
 ## Documentation Structure (Diátaxis)
 
-## documentation Structure (Diátaxis)
-
 The documentation is organized into four distinct sections, following the [Diátaxis framework](https://diataxis.fr/):
 
 ### 1. [Tutorials](tutorials/getting_started.md) (Learning-oriented)
