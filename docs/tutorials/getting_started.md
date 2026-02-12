@@ -43,7 +43,40 @@ The script will prompt you to:
 1. **Select a Project**: Choose the target project on your Migasfree server.
 2. **Select a Distro Base**: If not set via env vars, choose the base distribution (e.g., Ubuntu 22.04).
 
-## Step 4: Verification
+## Step 4: Understanding the Data (Templates)
+
+Migasfree Imports uses JSON templates to define what to import. Here is an example of what these files look like:
+
+**External Repository (e.g., Visual Studio Code):**
+
+```json
+{
+  "name": "vscode",
+  "deployment": {
+    "url": "https://packages.microsoft.com/repos/code",
+    "distribution": "stable",
+    "components": "main",
+    "key_url": "https://packages.microsoft.com/keys/microsoft.asc"
+  },
+  "package": "code"
+}
+```
+
+**Internal Package:**
+
+```json
+{
+  "name": "my-internal-package",
+  "deployment": {
+    "type": "internal",
+    "source_url": "http://internal-server/packages/my-package_1.0_all.deb"
+  }
+}
+```
+
+When you run `migasfree-import`, the tool reads these definitions and automatically creates the necessary **Deployments** and **Applications** in your Migasfree server.
+
+## Step 5: Verification
 
 Log in to your Migasfree server web interface and navigate to the project you selected. You should see the imported deployments and applications.
 

@@ -1,6 +1,21 @@
 # Migasfree Imports Documentation
 
-Welcome to the documentation for `migasfree-imports`, a tool to import projects, deployments, and applications into a Migasfree server from external sources.
+**Migasfree Imports** is a command-line tool designed to synchronize project configurations (deployments and applications) from external sources into a Migasfree server.
+
+It acts as a bridge between **Infrastructure as Code** (your JSON templates) and the Migasfree API, automating what would otherwise be a manual and repetitive process in the web interface.
+
+## Why use this tool?
+
+If you manage a Migasfree server, `migasfree-imports` allows you to:
+
+1. **Automate Project Setup**: Create entire project hierarchies (Project -> Stores -> Deployments -> Applications) in seconds.
+2. **Infrastructure as Code**: Define your software catalog in JSON files (or Git repositories) instead of clicking through the GUI.
+3. **Idempotency**: Run the tool as many times as you want; it will only create resources that don't exist, preventing duplicates.
+4. **External & Internal Sources**:
+    * **External Repositories**: Automatically configure third-party software (e.g., VS Code, Google Chrome).
+    * **Internal Packages**: Download `.deb`/`.rpm` files from a URL and upload them to your private Migasfree repository.
+
+## Documentation Structure (Diátaxis)
 
 ## documentation Structure (Diátaxis)
 
