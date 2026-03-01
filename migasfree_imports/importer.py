@@ -1,18 +1,39 @@
+import base64
+import io
 import json
 import logging
 import os
 import shutil
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from .client import MigasfreeImport
 from .utils import download_packages, select_distro, select_project, slugify
 
 GIT_REPO = 'https://github.com/migasfree/migasfree-imports'  # OFFICIAL (default selected)
 PACKAGES_PATH = './packages'
-TEMPLATES_PATH = './templates'
+TEMPLATE_FILE = os.path.join(os.path.dirname(__file__), '..', 'templates', 'template.json')
 
 logger = logging.getLogger(__name__)
+
+
+def load_template(path: str = TEMPLATE_FILE) -> Dict[str, Any]:
+    """Load the unified template JSON file."""
+    with open(path) as file:
+        return json.load(file)
+
+
+def decode_icon(data_uri: str) -> tuple:
+    """
+    Decode a data URI (data:image/png;base64,...) into binary content
+    and return (filename, file_object, mime_type).
+    """
+    # data:image/png;base64,iVBOR...
+    header, encoded = data_uri.split(',', 1)
+    mime_type = header.split(':')[1].split(';')[0]  # e.g. image/png
+    ext = mime_type.split('/')[1]  # e.g. png
+    raw = base64.b64decode(encoded)
+    return f'icon.{ext}', io.BytesIO(raw), mime_type
 
 
 class MigasfreeImporter:
@@ -20,9 +41,10 @@ class MigasfreeImporter:
     Handles the orchestration of importing configuration into a migasfree server.
     """
 
-    def __init__(self, client: MigasfreeImport) -> None:
+    def __init__(self, client: MigasfreeImport, template: Optional[Dict[str, Any]] = None) -> None:
         self.client = client
         self.current_date = datetime.now().strftime('%Y-%m-%d')
+        self.template = template or load_template()
 
     def run(self) -> None:
         """
@@ -30,8 +52,7 @@ class MigasfreeImporter:
         """
         # DISTRO_BASE
         # ===========
-        with open(os.path.join(TEMPLATES_PATH, 'distro_base')) as file:
-            distro_base = select_distro(json.load(file))
+        distro_base = select_distro(self.template['distros'])
 
         # SELECT PROJECT
         # ==============
@@ -78,8 +99,7 @@ class MigasfreeImporter:
         self._import_applications(project)
 
     def _import_deployments(self, distro_base: Dict[str, Any], project: Dict[str, Any]) -> None:
-        with open(os.path.join(TEMPLATES_PATH, 'deployments', distro_base['name'])) as file:
-            deployments = json.load(file)
+        deployments = self.template['deployments'][distro_base['name']]
 
         for deployment in deployments:
             ignored = deployment.get('ignored', False)
@@ -161,35 +181,36 @@ class MigasfreeImporter:
             )
 
     def _import_applications(self, project: Dict[str, Any]) -> None:
-        with open(os.path.join(TEMPLATES_PATH, 'applications', 'applications')) as file:
-            applications = json.load(file)
+        applications: List[Dict[str, Any]] = self.template['applications']
 
         for application in applications:
             # Category
             payload = {'name': application['category']}
             category = self.client.get_or_post('/api/v1/token/catalog/categories/', params=payload, data=payload)[0]
 
+            # Decode icon from base64 data URI
+            icon_filename, icon_file, icon_mime = decode_icon(application['icon'])
+
             # Apps
-            with open(f'templates/applications/{application["icon"]}', 'rb') as icon_file:
-                app = self.client.get_or_post(
-                    '/api/v1/token/catalog/apps/',
-                    params={'name': application['name']},
-                    data={
-                        'name': application['name'],
-                        'level': application['level'],
-                        'category': category['id'],
-                        'score': application['score'],
-                        'description': application['description'],
-                        'available_for_attributes': application['available_for_attributes'],
-                    },
-                    files={
-                        'icon': (
-                            application['icon'],
-                            icon_file,
-                            'image/png',
-                        )
-                    },
-                )[0]
+            app = self.client.get_or_post(
+                '/api/v1/token/catalog/apps/',
+                params={'name': application['name']},
+                data={
+                    'name': application['name'],
+                    'level': application['level'],
+                    'category': category['id'],
+                    'score': application['score'],
+                    'description': application['description'],
+                    'available_for_attributes': application['available_for_attributes'],
+                },
+                files={
+                    'icon': (
+                        icon_filename,
+                        icon_file,
+                        icon_mime,
+                    )
+                },
+            )[0]
 
             # Project-Packages
             project_packages = self.client.get_or_post(

@@ -1,9 +1,8 @@
-import json
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from migasfree_imports.importer import MigasfreeImporter
+from migasfree_imports.importer import MigasfreeImporter, decode_icon, load_template
 
 
 @pytest.fixture
@@ -15,8 +14,19 @@ def mock_client():
 
 
 @pytest.fixture
-def importer(mock_client):
-    return MigasfreeImporter(mock_client)
+def sample_template():
+    return {
+        'distros': [{'name': 'Focal', 'platform': 'Ubuntu 20.04', 'pms': 'deb', 'architecture': 'amd64'}],
+        'deployments': {
+            'Focal': [],
+        },
+        'applications': [],
+    }
+
+
+@pytest.fixture
+def importer(mock_client, sample_template):
+    return MigasfreeImporter(mock_client, template=sample_template)
 
 
 def test_init(importer, mock_client):
@@ -25,10 +35,6 @@ def test_init(importer, mock_client):
 
 
 def test_run_flow(importer, mock_client):
-    # Mock file operations and user selections
-    distro_base_content = json.dumps(
-        {'name': 'Focal', 'platform': 'Ubuntu 20.04', 'pms': 'deb', 'architecture': 'amd64'}
-    )
     projects_response = {'results': [{'name': 'TestProject'}]}
 
     # Mock Client Responses
@@ -36,18 +42,12 @@ def test_run_flow(importer, mock_client):
     mock_client.get_or_post.side_effect = [
         [{'id': 1}],  # Platform
         [{'id': 100, 'name': 'TestProject'}],  # Project
-        [{'id': 200}],  # Category
-        [{'id': 300}],  # App
-        [{'id': 400}],  # Project-Package
-        [{'id': 500}],  # Store (for internal deployment)
     ]
 
     # Mock Selectors
-    with patch('builtins.open', mock_open(read_data=distro_base_content)), patch(
-        'migasfree_imports.importer.select_distro'
-    ) as mock_select_distro, patch('migasfree_imports.importer.select_project') as mock_select_project, patch(
-        'migasfree_imports.importer.os.path.join', return_value='dummy_path'
-    ):
+    with patch('migasfree_imports.importer.select_distro') as mock_select_distro, patch(
+        'migasfree_imports.importer.select_project'
+    ) as mock_select_project:
         mock_select_distro.return_value = {
             'name': 'Focal',
             'platform': 'Ubuntu 20.04',
@@ -56,12 +56,6 @@ def test_run_flow(importer, mock_client):
         }
         mock_select_project.return_value = 'TestProject'
 
-        # Determine which file is being opened to return correct JSON
-        # This is complex with mock_open, so we might need a side_effect for open
-        # For simplicity, let's assume all json.load calls return compatible structure
-        # or we mock the specific methods _import_deployments and _import_applications
-
-        # Let's mock the internal methods to simplify the run test
         with patch.object(importer, '_import_deployments') as mock_deployments, patch.object(
             importer, '_import_applications'
         ) as mock_applications:
@@ -82,3 +76,39 @@ def test_run_flow(importer, mock_client):
 
             mock_deployments.assert_called()
             mock_applications.assert_called()
+
+
+def test_decode_icon():
+    """Test decode_icon with a minimal valid 1x1 PNG in base64."""
+    import base64
+
+    # Minimal 1x1 transparent PNG
+    tiny_png = (
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01'
+        b'\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89'
+        b'\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01'
+        b'\r\n\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+    )
+    b64_data = base64.b64encode(tiny_png).decode()
+    data_uri = f'data:image/png;base64,{b64_data}'
+
+    filename, file_obj, mime = decode_icon(data_uri)
+
+    assert filename == 'icon.png'
+    assert mime == 'image/png'
+    assert file_obj.read() == tiny_png
+
+
+def test_load_template():
+    """Test that the real template.json loads successfully."""
+    template = load_template()
+    assert 'distros' in template
+    assert 'deployments' in template
+    assert 'applications' in template
+    assert len(template['distros']) > 0
+    assert len(template['deployments']) > 0
+    assert len(template['applications']) > 0
+
+    # Verify icons are data URIs
+    for app in template['applications']:
+        assert app['icon'].startswith('data:image/')
